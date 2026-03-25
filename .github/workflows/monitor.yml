@@ -1,0 +1,45 @@
+name: Trump Truth Social Monitor
+
+on:
+  schedule:
+    # 每 5 分鐘執行一次
+    - cron: "*/5 * * * *"
+  workflow_dispatch: # 允許手動觸發
+
+jobs:
+  check-posts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Install Playwright Chromium
+        run: python -m playwright install chromium --with-deps
+
+      - name: Download last_seen_id
+        uses: actions/cache@v4
+        with:
+          path: last_seen_id.txt
+          key: last-seen-id-${{ github.run_id }}
+          restore-keys: |
+            last-seen-id-
+
+      - name: Run monitor
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python run_once.py
+
+      - name: Save last_seen_id
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: last_seen_id.txt
+          key: last-seen-id-${{ github.run_id }}
