@@ -2,13 +2,17 @@ name: Trump Truth Social Monitor
 
 on:
   schedule:
-    # 每 5 分鐘執行一次
-    - cron: "*/5 * * * *"
+    # 每小時執行一次（每個 job 內部以 2 分鐘迴圈運行 50 分鐘）
+    - cron: "0 * * * *"
   workflow_dispatch: # 允許手動觸發
 
 jobs:
   check-posts:
     runs-on: ubuntu-latest
+    timeout-minutes: 55
+    concurrency:
+      group: trump-monitor
+      cancel-in-progress: false
     steps:
       - uses: actions/checkout@v4
 
@@ -31,7 +35,7 @@ jobs:
           restore-keys: |
             last-seen-id-
 
-      - name: Run monitor
+      - name: Run monitor loop
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
