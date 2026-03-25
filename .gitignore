@@ -1,0 +1,4 @@
+.env
+last_seen_id.txt
+__pycache__/
+*.pyc
