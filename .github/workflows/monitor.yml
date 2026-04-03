@@ -5,6 +5,9 @@ on:
     - cron: "*/5 * * * *"  # 每 5 分鐘執行一次
   workflow_dispatch: # 可手動觸發
 
+permissions:
+  contents: write
+
 jobs:
   check-and-send:
     runs-on: ubuntu-latest
