@@ -2,11 +2,8 @@ name: Trump Truth Social Monitor
 
 on:
   schedule:
-    - cron: "*/5 * * * *"  # 每 5 分鐘執行一次
-  workflow_dispatch: # 可手動觸發
-
-permissions:
-  contents: write
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
 
 jobs:
   check-and-send:
@@ -23,17 +20,22 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Restore sent posts cache
+        uses: actions/cache/restore@v4
+        with:
+          path: sent_posts.json
+          key: sent-posts-dummy
+          restore-keys: sent-posts-
+
       - name: Run monitor
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: python trump_monitor.py
 
-      - name: Save state
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git pull --rebase origin main
-          git add sent_posts.json
-          git diff --cached --quiet || git commit -m "update sent_posts"
-          git push
+      - name: Save sent posts cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: sent_posts.json
+          key: sent-posts-${{ github.run_id }}
