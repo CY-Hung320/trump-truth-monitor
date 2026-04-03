@@ -1,7 +1,0 @@
-services:
-  trump-monitor:
-    build: .
-    restart: unless-stopped
-    env_file: .env
-    volumes:
-      - ./last_seen_id.txt:/app/last_seen_id.txt

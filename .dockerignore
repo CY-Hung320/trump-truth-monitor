@@ -1,9 +1,0 @@
-.env
-.env.example
-last_seen_id.txt
-__pycache__
-*.pyc
-.git
-README.md
-render.yaml
-docker-compose.yml
